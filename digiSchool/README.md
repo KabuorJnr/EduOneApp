@@ -47,9 +47,21 @@ DigiShule (also known as EduOne) is a comprehensive, offline-first school manage
 
 All utility scripts for database seeding, testing, and RPC checks are located in the `scripts/` directory.
 
-- `npm run lint`: Run ESLint across the codebase.
-- `npm run test`: Run the Vitest test suite.
-- `npm run build`: Build the frontend for production.
+### Web App Scripts
+- `npm run dev`: Start Vite dev server (localhost:5173)
+- `npm run build`: Build the frontend for production
+- `npm run lint`: Run ESLint across the codebase
+- `npm run test`: Run the Vitest test suite
+- `npm run preview`: Preview production build locally
+
+### Desktop App Scripts
+- `npm run desktop:dev`: Run desktop app connected to local dev server
+- `npm run desktop:build`: Build for production (requires portal URL)
+- `npm run desktop:build:local`: Build for local dev server
+- `npm run flutter:deps`: Install Flutter dependencies
+- `npm run flutter:clean`: Clean Flutter build cache
+
+For detailed desktop app setup, see [DESKTOP_SETUP.md](./DESKTOP_SETUP.md).
 
 ## Project Structure
 
@@ -62,6 +74,49 @@ All utility scripts for database seeding, testing, and RPC checks are located in
 - `/scripts`: Debugging and database seeding tools.
 - `/supabase`: SQL migrations and database schema setup.
 
-## Desktop Shell
+## Desktop App (Flutter)
 
-A Flutter desktop shell lives in `/flutter_desktop`. It wraps the existing portal in a native Windows window and can be pointed at a local or deployed portal URL with `--dart-define=DIGISCHOOL_PORTAL_URL=...`.
+A **Flutter desktop shell** wraps the entire DigiSchool portal in a native Windows application. All features work identically to the web version, with the added benefit of native desktop integration.
+
+### Quick Start
+
+```powershell
+# Install Flutter (see DESKTOP_SETUP.md for details)
+flutter config --enable-windows-desktop
+
+# Run with local dev server
+npm run desktop:dev
+
+# Or manually:
+cd flutter_desktop
+flutter pub get
+flutter run -d windows --dart-define=DIGISCHOOL_PORTAL_URL=http://localhost:5173
+```
+
+### Features
+
+✅ **100% Web App Compatibility** - All features work exactly as the web version  
+✅ **Native Desktop UI** - Window controls, navigation toolbar, responsive layout  
+✅ **Full Backend Access** - Direct Supabase connection (auth, data, storage, realtime)  
+✅ **Developer Tools** - F12 devtools for debugging  
+✅ **Production Ready** - Build for distribution with your production domain  
+
+### Build for Distribution
+
+```powershell
+# Build release executable for production
+npm run desktop:build -PortalUrl 'https://your-domain.com'
+
+# Output: build/output/digischool_desktop.exe
+# Distribute as ZIP or create Windows installer (MSIX)
+```
+
+### Architecture
+
+The desktop app consists of:
+- **Flutter Shell** (`flutter_desktop/lib/`) - Window management and UI chrome
+- **Embedded WebView** - Renders the React web app
+- **Supabase Backend** - All data and auth flows pass through seamlessly
+
+See [flutter_desktop/README.md](./flutter_desktop/README.md) for detailed documentation.  
+See [DESKTOP_SETUP.md](./DESKTOP_SETUP.md) for complete setup guide.

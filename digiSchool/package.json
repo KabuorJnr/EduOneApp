@@ -8,7 +8,12 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "desktop:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/desktop-dev.ps1",
+    "desktop:build": "powershell -ExecutionPolicy Bypass -File ./scripts/desktop-build.ps1 -PortalUrl 'https://your-domain.com'",
+    "desktop:build:local": "powershell -ExecutionPolicy Bypass -File ./scripts/desktop-build.ps1 -PortalUrl 'http://localhost:5173'",
+    "flutter:deps": "cd flutter_desktop && flutter pub get && cd ..",
+    "flutter:clean": "cd flutter_desktop && flutter clean && cd .."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.0",
