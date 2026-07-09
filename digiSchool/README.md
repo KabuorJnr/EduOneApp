@@ -61,3 +61,7 @@ All utility scripts for database seeding, testing, and RPC checks are located in
 - `/api`: Serverless functions (e.g., Vercel API routes for email sending).
 - `/scripts`: Debugging and database seeding tools.
 - `/supabase`: SQL migrations and database schema setup.
+
+## Desktop Shell
+
+A Flutter desktop shell lives in `/flutter_desktop`. It wraps the existing portal in a native Windows window and can be pointed at a local or deployed portal URL with `--dart-define=DIGISCHOOL_PORTAL_URL=...`.
