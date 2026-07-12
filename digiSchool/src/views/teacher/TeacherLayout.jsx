@@ -10,7 +10,16 @@ export default function TeacherLayout() {
 
   const teacherName = user?.name || 'Teacher';
 
-  const teacherProfile = useMemo(() => store.teachers?.find(t => t.id === user?.id || t.name === teacherName) || {}, [store.teachers, user?.id, teacherName]);
+  const teacherProfile = useMemo(() => {
+    if (!store.teachers) return {};
+    return store.teachers.find(t => 
+      t.id === user?.id || 
+      t.id === user?.teacher_id || 
+      t.emp_id === user?.teacher_id ||
+      t.emp_id === user?.id ||
+      (t.name || '').toLowerCase() === teacherName.toLowerCase()
+    ) || {};
+  }, [store.teachers, user?.id, user?.teacher_id, teacherName]);
   
   const subject = teacherProfile.subject || user?.dept || 'Mathematics';
   const assignedClass = teacherProfile.assignedClass || null;
@@ -20,15 +29,28 @@ export default function TeacherLayout() {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [meetingRequests, setMeetingRequests] = useState([]);
 
+  const subjectAssignments = useMemo(() => {
+    if (!store.subjectAssignments) return [];
+    return store.subjectAssignments.filter(a => a.teacher_id === teacherProfile.id || a.teacher_id === user?.id);
+  }, [store.subjectAssignments, teacherProfile.id, user?.id]);
+
+  const subjectClasses = useMemo(() => {
+    return subjectAssignments.map(a => a.stream_name ? `${a.class_name} ${a.stream_name}` : a.class_name);
+  }, [subjectAssignments]);
+
   useEffect(() => {
     let active = true;
-    import('../../lib/api').then(({ fetchStudents }) => {
-      fetchStudents(0, 200, { class: assignedClass || null }).then(res => {
-        if (active) setLoadedStudents(res.data);
-      }).catch(() => {});
-    });
+    if (active) {
+      if (assignedClass || subjectClasses.length > 0) {
+        setLoadedStudents(store.students.filter(s => 
+          s.class === assignedClass || subjectClasses.includes(s.class)
+        ));
+      } else {
+        setLoadedStudents([]);
+      }
+    }
     return () => { active = false; };
-  }, [assignedClass]);
+  }, [assignedClass, subjectClasses, store.students]);
 
   useEffect(() => {
     let active = true;
@@ -95,7 +117,8 @@ export default function TeacherLayout() {
         loadedStudents, setLoadedStudents,
         messages, setMessages,
         leaveRequests, setLeaveRequests,
-        meetingRequests, setMeetingRequests
+        meetingRequests, setMeetingRequests,
+        subjectAssignments, subjectClasses
       }} />
     </div>
   );

@@ -45,7 +45,11 @@ const TABLES = {
   messages: 'messages', studentAttendance: 'student_attendance',
   assignmentSubmissions: 'assignment_submissions',
   parentMeetingRequests: 'parent_meeting_requests',
-  calendarEvents: 'calendar_events'
+  calendarEvents: 'calendar_events',
+  departments: 'departments',
+  subjects: 'subjects',
+  teacherQualifications: 'teacher_subject_qualifications',
+  subjectAssignments: 'subject_assignments'
 };
 
 export async function fetchTable(key) {
@@ -67,6 +71,9 @@ export async function fetchTable(key) {
     
     if (_schoolId) {
       query = query.eq('school_id', _schoolId);
+    } else {
+      // Prevent fetching data without a school context to avoid cross-school leakage
+      return [];
     }
     const { data, error } = await query;
     if (error) throw error;
@@ -187,6 +194,24 @@ export async function saveConfig(patch) {
   if (error) throw error;
 }
 
+// ---- Profiles ---------------------------------------------------------------
+
+export async function updateProfile(id, patch) {
+  const { error } = await supabase.from('profiles').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+export async function fetchStaffRolesByTeacherId(teacherId) {
+  const { data, error } = await supabase.from('profiles').select('*').eq('teacher_id', teacherId);
+  if (error) throw error;
+  return data || [];
+}
+
+export async function deleteStaffRole(userId, role) {
+  const { error } = await supabase.from('profiles').delete().match({ id: userId, role: role });
+  if (error) throw error;
+}
+
 // ---- Teachers / students --------------------------------------------------
 export async function fetchTeachers() {
   let query = supabase.from('teachers').select('*').order('id');
@@ -219,6 +244,8 @@ export async function upsertTeacher(teacher) {
     phone: teacher.phone,
     status: teacher.status || 'Active',
     assigned_class: teacher.assignedClass || null,
+    tsc_number: teacher.tsc_number || null,
+    bio: teacher.bio || null,
     school_id: _schoolId,
   });
   if (error) throw error;
@@ -506,7 +533,8 @@ export async function saveTimetables(map, term) {
 
 
 export async function upsertRow(key, row) {
-  const payload = _schoolId ? { ...row, school_id: _schoolId } : row;
+  if (!_schoolId) throw new Error('Cannot upsert row without an active school context');
+  const payload = { ...row, school_id: _schoolId };
   const table = TABLES[key] || key;
   
   if (!navigator.onLine) {
@@ -529,8 +557,9 @@ export async function upsertRow(key, row) {
 }
 
 export async function updateRow(key, id, row, idColumn = 'id') {
+  if (!_schoolId) throw new Error('Cannot update row without an active school context');
   const table = TABLES[key] || key;
-  const payload = _schoolId ? { ...row, school_id: _schoolId } : row;
+  const payload = { ...row, school_id: _schoolId };
 
   if (!navigator.onLine) {
     console.warn(`[Offline] Queueing update for ${table}`);

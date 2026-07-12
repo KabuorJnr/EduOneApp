@@ -11,7 +11,6 @@ import Facilities from '../Facilities';
 import TeacherResources from '../TeacherResources';
 import ClassTeachers from '../ClassTeachers';
 import ParentPortal from '../ParentPortal';
-import CreateExam from '../CreateExam';
 import AcademicsDashboard from '../AcademicsDashboard';
 import AdminDashboard from '../AdminDashboard';
 import Notices from '../Notices';
@@ -21,13 +20,14 @@ import SelectProfile from '../SelectProfile';
 import SchemeOfWork from '../SchemeOfWork';
 import LessonPlans from '../LessonPlans';
 import StaffAttendance from '../StaffAttendance';
+import TeacherManagement from '../TeacherManagement';
+import MyProfile from '../MyProfile';
 
 const VIEW_MAP = {
   developer_portal: DeveloperPortal,
   overview: Overview,
   timetable: Timetable,
   exams: ExamSchedules,
-  create_exam: CreateExam,
   academics_dashboard: AcademicsDashboard,
   admin_dashboard: AdminDashboard,
   gradebook: Gradebook,
@@ -45,6 +45,8 @@ const VIEW_MAP = {
   scheme_of_work: SchemeOfWork,
   lesson_plans: LessonPlans,
   staff_attendance: StaffAttendance,
+  teacher_management: TeacherManagement,
+  my_profile: MyProfile,
 };
 
 export default function LegacyViewLoader() {

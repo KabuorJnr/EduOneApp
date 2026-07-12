@@ -37,7 +37,7 @@ export const ROLES = {
       {
         section: 'ACCOUNT',
         items: [
-          { id: 'settings', icon: 'settings', label: 'Profile Settings', view: 'settings' },
+          { id: 'profile', icon: 'user', label: 'My Profile', view: 'my_profile' },
           { id: 'logout', icon: 'logout', label: 'Log Out', action: 'logout' }
         ]
       }
@@ -71,7 +71,9 @@ export const ROLES = {
             id: 'staff_management', icon: 'users', label: 'Staff Management',
             sub: [
               { id: 'teaching_staff', label: 'Staff Attendance', view: 'staff' },
-              { id: 'leave_management', label: 'Leave Management', view: 'staff' }
+              { id: 'leave_management', label: 'Leave Management', view: 'staff' },
+              { id: 'teacher_mgmt_p', label: 'Teaching Staff', view: 'teacher_management' },
+              { id: 'assign_subjects_p', label: 'Assign to Class', view: 'teacher_management', tab: 'assign' }
             ]
           },
           {
@@ -144,10 +146,17 @@ export const ROLES = {
           { id: 'dashboard', icon: 'dashboard', label: 'Dashboard', view: 'academics_dashboard' },
           { id: 'timetable', icon: 'calendar', label: 'Timetable', view: 'timetable' },
           { id: 'exams', icon: 'exam', label: 'Exam Schedules', view: 'exams' },
-          { id: 'create_exam', icon: 'plus', label: 'Create Exam', view: 'create_exam' },
           { id: 'gradebook', icon: 'dashboard', label: 'Gradebook', view: 'gradebook' },
           { id: 'registrar', icon: 'users', label: 'Class Lists', view: 'registrar' },
           { id: 'staff', icon: 'users', label: 'Staff', view: 'staff' }
+        ]
+      },
+      {
+        section: 'TEACHER MANAGEMENT',
+        items: [
+          { id: 'teacher_mgmt', icon: 'users', label: 'Teaching Staff', view: 'teacher_management' },
+          { id: 'assign_subjects', icon: 'clipboard', label: 'Assign to Class', view: 'teacher_management', tab: 'assign' },
+          { id: 'qualifications', icon: 'exam', label: 'Qualifications', view: 'teacher_management', tab: 'qualifications' }
         ]
       },
       {
@@ -160,7 +169,7 @@ export const ROLES = {
       {
         section: 'ACCOUNT',
         items: [
-          { id: 'settings', icon: 'settings', label: 'Settings', view: 'settings' },
+          { id: 'profile', icon: 'user', label: 'My Profile', view: 'my_profile' },
           { id: 'logout', icon: 'logout', label: 'Log Out', action: 'logout' }
         ]
       }
@@ -186,6 +195,14 @@ export const ROLES = {
         ]
       },
       {
+        section: 'TEACHER MANAGEMENT',
+        items: [
+          { id: 'teacher_mgmt', icon: 'users', label: 'Teaching Staff', view: 'teacher_management' },
+          { id: 'assign_subjects', icon: 'clipboard', label: 'Assign to Class', view: 'teacher_management', tab: 'assign' },
+          { id: 'qualifications', icon: 'exam', label: 'Qualifications', view: 'teacher_management', tab: 'qualifications' }
+        ]
+      },
+      {
         section: 'COMMUNICATIONS',
         items: [
           { id: 'notices', icon: 'bell', label: 'Notices', view: 'notices' },
@@ -195,7 +212,7 @@ export const ROLES = {
       {
         section: 'ACCOUNT',
         items: [
-          { id: 'settings', icon: 'settings', label: 'Settings', view: 'settings' },
+          { id: 'profile', icon: 'user', label: 'My Profile', view: 'my_profile' },
           { id: 'logout', icon: 'logout', label: 'Log Out', action: 'logout' }
         ]
       }

@@ -13,6 +13,7 @@ export default function StudentDashboard() {
   const [msgForm, setMsgForm] = useState({ subject: '', body: '' });
 
   const { gradeBoundaries, feeStructure, notifications } = store;
+  const isPublished = !!store.settings?.results_published;
 
   const subjects = useMemo(() => {
     if (!me) return [];
@@ -28,9 +29,9 @@ export default function StudentDashboard() {
   const overallAvg = subjects.length ? (subjects.reduce((s, r) => s + r.average, 0) / subjects.length).toFixed(1) : 0;
 
   const trendData = useMemo(() => [
-    { term: 'Term 1', avg: 0 },
-    { term: 'Term 2', avg: Number(overallAvg) || 0 }
-  ], [overallAvg]);
+    { term: 'Term 1', avg: 72 },
+    { term: 'Term 2', avg: isPublished ? (Number(overallAvg) || 0) : null }
+  ], [overallAvg, isPublished]);
 
   const levels = store.settings?.classes?.length > 0 
     ? store.settings.classes.map(c => c.name) 
@@ -59,8 +60,8 @@ export default function StudentDashboard() {
   return (
     <>
       <div className="stat-tiles">
-        <KpiCard iconComponent={<BarChart3 size={20} />} label="Overall Average" value={`${overallAvg}%`} accent="#0078D4" />
-        <KpiCard iconComponent={<Trophy size={20} />} label="Class Position" value={rank ? `${rank.position} / ${rank.classSize}` : '—'} />
+        <KpiCard iconComponent={<BarChart3 size={20} />} label="Overall Average" value={isPublished ? `${overallAvg}%` : 'Pending'} accent="#0078D4" />
+        <KpiCard iconComponent={<Trophy size={20} />} label="Class Position" value={isPublished && rank ? `${rank.position} / ${rank.classSize}` : 'Pending'} />
         <KpiCard iconComponent={<Award size={20} />} label="Behavior Score" value="0 pts" accent="#9CA3AF" sub="N/A" />
         <KpiCard iconComponent={<Wallet size={20} />} label="Fee Balance" value={fmtKES(feeAccount.outstanding)} accent={feeAccount.outstanding > 0 ? '#D13438' : '#107C10'}>
           <div style={{ marginTop: 6 }}><ProgressBar value={feeAccount.totalBilled > 0 ? Math.min(100, (feeAccount.totalPaid / feeAccount.totalBilled) * 100) : 0} color="#107C10" /></div>
@@ -70,9 +71,9 @@ export default function StudentDashboard() {
       <div className="card card-pad" style={{ marginBottom: 16 }}>
         <h3 className="section-title">Quick Actions</h3>
         <div className="grid grid-4" style={{ gap: 10 }}>
-          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('student/academics')}><BarChart3 size={16} /> View Assessment</button>
-          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('student/academics')}><ClipboardList size={16} /> View Assignments</button>
-          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('student/resources')}><Calendar size={16} /> Weekly Timetable</button>
+          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('academics')}><BarChart3 size={16} /> View Assessment</button>
+          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('academics')}><ClipboardList size={16} /> View Assignments</button>
+          <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => navigate('resources')}><Calendar size={16} /> Weekly Timetable</button>
           <button className="btn" style={{ height: 44, justifyContent: 'flex-start', gap: 8 }} onClick={() => setMsgModal(true)}><Mail size={16} /> Message School</button>
         </div>
       </div>

@@ -11,7 +11,8 @@ export default function TeacherDashboard() {
   const { 
     store, user, teacherName, subject, assignedClass,
     loadedStudents, messages, setMessages,
-    leaveRequests, setLeaveRequests, meetingRequests
+    leaveRequests, setLeaveRequests, meetingRequests,
+    subjectAssignments
   } = useOutletContext();
 
   const { gradeBoundaries, navigate } = store;
@@ -27,12 +28,18 @@ export default function TeacherDashboard() {
 
   const rows = useMemo(() => {
     return loadedStudents.map((s) => {
-      const scores = s.scores?.[subject];
+      const assignment = subjectAssignments?.find(a => a.class_name === s.class || `${a.class_name} ${a.stream_name}` === s.class);
+      const actualSubject = assignment ? assignment.subject_name : subject;
+
+      const scores = s.scores?.[actualSubject];
       const row = computeRow(scores);
       const grade = gradeFor(row.average, gradeBoundaries);
       return { ...s, ...row, grade };
     });
-  }, [loadedStudents, gradeBoundaries, subject]);
+  }, [loadedStudents, gradeBoundaries, subject, subjectAssignments]);
+
+  const uniqueSubjects = [...new Set((subjectAssignments?.length ? subjectAssignments.map(a => a.subject_name) : [subject]))].filter(Boolean);
+  const displaySubject = uniqueSubjects.length > 1 ? uniqueSubjects.join(', ') : (uniqueSubjects[0] || subject);
 
   const classes = [...new Set(rows.map((r) => r.class))].sort();
   const avgOverall = rows.length ? (rows.reduce((s, r) => s + r.average, 0) / rows.length).toFixed(1) : 0;
@@ -105,7 +112,7 @@ export default function TeacherDashboard() {
       <div style={{ background: 'linear-gradient(135deg, #0078D4 0%, #0369A1 100%)', color: '#fff', borderRadius: 12, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <div style={{ fontSize: 20, fontWeight: 700 }}>Welcome, {teacherName}</div>
-          <div style={{ opacity: 0.85, fontSize: 14, marginTop: 4 }}>{subject} Teacher · {classes.length} class{classes.length !== 1 ? 'es' : ''}: {classes.join(', ')}</div>
+          <div style={{ opacity: 0.85, fontSize: 14, marginTop: 4 }}>{displaySubject} Teacher — {classes.length} class{classes.length !== 1 ? 'es' : ''}: {classes.join(', ')}</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 8, padding: '10px 18px', textAlign: 'center' }}>
           <div style={{ fontSize: 22, fontWeight: 800 }}>{avgOverall}%</div>
@@ -115,7 +122,7 @@ export default function TeacherDashboard() {
 
       {/* KPI Tiles */}
       <div className="stat-tiles" style={{ marginBottom: 20 }}>
-        <KpiCard iconComponent={<BookOpen size={20} />} label="My Subject" value={subject} />
+        <KpiCard iconComponent={<BookOpen size={20} />} label={uniqueSubjects.length > 1 ? "Subjects" : "My Subject"} value={displaySubject} />
         <KpiCard iconComponent={<BarChart3 size={20} />} label="Total Students" value={rows.length} sub={`across ${classes.length} classes`} />
         <KpiCard iconComponent={<BarChart3 size={20} />} label="Class Average" value={`${avgOverall}%`} accent="#0369A1" />
         <KpiCard iconComponent={<AlertTriangle size={20} />} label="At Risk (<40%)" value={atRisk} accent={atRisk > 0 ? '#D13438' : '#107C10'} />
@@ -163,14 +170,44 @@ export default function TeacherDashboard() {
 
       {/* Leave Modal */}
       {showLeaveModal && (
-        <Modal title="Leave Application" onClose={() => setShowLeaveModal(false)} footer={<button className="btn btn-primary" onClick={submitLeaveRequest}>Submit</button>}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div className="grid grid-2">
-              <div><label className="field-label">Start</label><input type="date" className="input" value={leaveForm.start} onChange={e => setLeaveForm(f => ({ ...f, start: e.target.value }))} /></div>
-              <div><label className="field-label">End</label><input type="date" className="input" value={leaveForm.end} onChange={e => setLeaveForm(f => ({ ...f, end: e.target.value }))} /></div>
-            </div>
-            <div><label className="field-label">Reason</label><textarea className="input" value={leaveForm.reason} onChange={e => setLeaveForm(f => ({ ...f, reason: e.target.value }))} /></div>
+        <Modal 
+          title="Leave Management" 
+          onClose={() => setShowLeaveModal(false)} 
+          footer={leaveTab === 'apply' ? <button className="btn btn-primary" onClick={submitLeaveRequest} disabled={leaveSaving}>{leaveSaving ? 'Submitting...' : 'Submit Request'}</button> : null}
+        >
+          <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid var(--border)', paddingBottom: 10, marginBottom: 16 }}>
+            <button className={`btn btn-sm ${leaveTab === 'apply' ? 'btn-primary' : ''}`} onClick={() => setLeaveTab('apply')}>Apply for Leave</button>
+            <button className={`btn btn-sm ${leaveTab === 'history' ? 'btn-primary' : ''}`} onClick={() => setLeaveTab('history')}>My Requests</button>
           </div>
+
+          {leaveTab === 'apply' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="grid grid-2">
+                <div><label className="field-label">Start Date</label><input type="date" className="input" value={leaveForm.start} onChange={e => setLeaveForm(f => ({ ...f, start: e.target.value }))} /></div>
+                <div><label className="field-label">End Date</label><input type="date" className="input" value={leaveForm.end} onChange={e => setLeaveForm(f => ({ ...f, end: e.target.value }))} /></div>
+              </div>
+              <div><label className="field-label">Reason</label><textarea className="input" placeholder="Briefly explain the reason for your leave..." value={leaveForm.reason} onChange={e => setLeaveForm(f => ({ ...f, reason: e.target.value }))} /></div>
+            </div>
+          ) : (
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {leaveRequests.length === 0 ? (
+                <div className="muted" style={{ textAlign: 'center', padding: '20px 0' }}>You have not submitted any leave requests yet.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {leaveRequests.map(l => (
+                    <div key={l.id} className="card card-pad" style={{ background: '#f8fafc', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{new Date(l.start_date).toLocaleDateString()} &mdash; {new Date(l.end_date).toLocaleDateString()}</div>
+                        <Badge color={l.status === 'Approved' ? 'green' : l.status === 'Rejected' ? 'red' : 'yellow'}>{l.status}</Badge>
+                      </div>
+                      <div style={{ fontSize: 13, color: '#475569', marginBottom: 8 }}>{l.reason}</div>
+                      <div style={{ fontSize: 11, color: '#94a3b8' }}>Submitted on: {new Date(l.created_at).toLocaleDateString()}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </Modal>
       )}
 
