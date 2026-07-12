@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DigiSchool</string>
+    <string name="title_activity_main">DigiSchool</string>
+    <string name="package_name">edu.one.digischool</string>
+    <string name="custom_url_scheme">edu.one.digischool</string>
+</resources>
